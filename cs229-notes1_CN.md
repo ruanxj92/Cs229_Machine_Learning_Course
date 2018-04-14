@@ -289,9 +289,36 @@ $$
 $$
 在第三步，利用了迹只是一个实数的这条性质；第四步利用了性质$trA=trA^T$;第五步利用了式(5),其中$A^T=\theta,B=B^T=X^TX及C=I$以及式(1)。为了求J最小值，令导数为零，得到正规方程：
 $$
-X^TX\theta=X^T\overrightarrow
+X^TX\theta=X^T\overrightarrow y
 $$
 那么$J(\theta)$取最小值时$\theta$的取值由下式这样的封闭形式得到：
 $$
 \theta=(X^TX)^{-1}X^T\overrightarrow y
 $$
+####3 概率解释
+当我们面对回归问题的时候，为什么用线性回归，特别是为什么用最小二乘代价函数J是合理的选择？在这一节，我们会给出一系列概率假设，在这些假设下，最小二乘回归是一种非常自然的算法。
+让让我们假设目标值和输入值满足以下方程：
+$$
+y^{(i)}=\theta^Tx^{i}+\epsilon^{(i)},
+$$
+其中$\epsilon^{(i)}$是误差项，可能原因是模型以外的因素（比如某特征与房价高度相关，但是没有被纳入回归）或者随机噪声。进一步假设$\epsilon^{(i)}$是与有均值零及一定的方差$\sigma$的高斯分布（或正态分布）独立同分布的。我们把这个假设写成"$\epsilon^{(i)}～\cal N(0,\sigma^2)$"。换句话说,$\epsilon^{(i)}$的概率密度函数满足：
+$$
+p(\epsilon^{(i)})=\frac{1}{\sqrt{2\pi}\sigma}exp(-\frac{(\epsilon^{(i)})^2}{2\sigma^2})
+$$
+这表明：
+$$
+p(y^{(i)}|x^{(i)};\theta)=\frac{1}{\sqrt{2\pi}\sigma}exp(-\frac{(y^{(i)}-\theta^Tx^{(i)})^2}{2\sigma^2})
+$$
+记号$p(y^{(i)}|x^{(i)};\theta)$表示$y^{(i)}$在给定$x^{(i)}$下由$\theta$参数决定的概率密度函数。注意到不应该把$\theta$作为条件($p(y^{(i)}|x^{(i)},\theta)$),因为$\theta$不是随机变量。可以把$y^{(i)}$写成$y^{(i)}|x^{(i)};\theta\sim\cal N (\theta^Tx^{(i)},\sigma^2)$。
+对于给定X（即设计矩阵，其包含所有$x^{(i)}$）及$\theta$，对应的$y^{(i)}$是什么样的分布？数据的概率由$p(\overrightarrow y|X;\theta)$给出。对于某个特定的$\theta$的值，这个概率通常被看做是$\overrightarrow y$(或者X)的函数。当我们把它看做一个$\theta$的具体的函数时，我们会把它叫做**似然**函数：
+$$
+L(\theta)=L(\theta;X,\overrightarrow y)=p(\overrightarrow y|X;\theta)
+$$
+注意到$\epsilon^{(i)}$的独立性假设（也包括$y^{(i)}和x^{(i)}$）,上式也可写成：
+$$
+\begin{align}
+L(\theta)&=\prod^{m}_{i=1}p(y^{(i)}|x^{(i)},\theta)\\
+&=\prod^{m}_{i=1}\frac{1}{\sqrt{2\pi}\sigma}exp(-\frac{(y^{(i)}-\theta^Tx^{(i)})^2}{2\sigma^2})
+\end{align}
+$$
+现在给定关于$y^{(i)}和x^{(i)}$的概率模型，那么对参数$\theta$的合理的最佳估计是什么？**极大似然**估计方法是指我们应该估计$\theta$使得数据的概率尽可能大。也就是说我，我们求使得$L(\theta)$最大化的$\theta$。
