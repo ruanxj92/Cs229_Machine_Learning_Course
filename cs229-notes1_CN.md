@@ -51,7 +51,7 @@
 
 当需要预测的目标变量连续时，比如说我们房价的例子，我们把这样的学习问题叫做**回归**问题。当y只能取若干较小数量的离散值时（比如说给定居住面积，我们想预测某住所是独栋房还是公寓）我们称之为**分类**问题。
 ###部分 一
-##线性回归
+####线性回归
 为了使得房价预测的例子更加有趣，让我们考虑一个更加丰富的数据集，其中包括了每栋房子的卧室数量：
 居住面积(平方英尺)|卧室数|价格(千美元)
 ---------------|------|---------
@@ -83,7 +83,7 @@ $$
 J(\theta)=\frac{1}{2}\sum^{m}_{i=1}(h_{\theta}(x^{(i)})-y^{(i)})^{2}
 $$
 如果你已经见过线形回归，你会注意到这和普通的最小二乘法的代价函数很相似。无论之前是否见过，我们最终会知道这是更广泛算法中的一个特例。
-##1 LMS算法
+#####1 LMS算法
 我们想通过选择$\theta$ 来使 $J(\theta)$最小化。为了找到这样的$\theta$, 我们用一些“猜测”的初值来开始搜索算法，然后不断改变$\theta$使得$J(\theta)$ 更小，直到收敛到一个$\theta$ 的值使得$J(\theta)$ 最小化。特别的，考虑梯度下降算法，该算法从一些初值$\theta$开始，重复以下操作更新 [^footnote]：
 $$
 \theta_{j}:=\theta_{j}-\alpha\frac{\partial}{\partial\theta_{j}}J(\theta).
@@ -158,7 +158,140 @@ Loop\{\\
 $$
 在这个算法中，我们重复遍历训练集，每次遇到一个训练样本，我们根据单个训练样本的误差的梯度更新参数。这个算法称为**随机梯度下降**(也称**增量梯度下降**)。 当批梯度下降法执行一步更新操作要遍历整个训练集-当m很大时，这个操作很费时-随机梯度下降可以直接开始，然后每过一个训练赝本都可以前进一步。经常是随机梯度下降靠近最小值比批梯度下降快得多。（注意有时候也许永远不能收敛到最小值，参数$\theta$会在$J(\theta)$的最小值附近振荡；但是实际上大多数足够靠近最小值的近似都是真正最小值的一个不错的近似值[^footnote2]）。考虑到以上原因，实际上当训练集足够大，随机梯度下降经常都是比批梯度下降更受欢迎的。
 
-##2 正规方程
-梯度下降给出了一种最小化$J$ 的方法。
-让我们讨论第二种方法，这次明确地做最小化而不用迭代算法。在这个方法中，我们明确的求对$\theta_j$的导数来并令之为零来I求$J$的最小值。为了不用写大量的代数和整页整页的矩阵的导数，让我们引入一些记号来做矩阵的计算。
+#####2 正规方程
+梯度下降给出了一种最小化$J$ 的方法。让我们讨论第二种方法，这次明确地做最小化而不用迭代算法。在这个方法中，我们明确的求对$\theta_j$的导数来并令之为零来I求$J$的最小值。为了不用写大量的代数和整页整页的矩阵的导数，让我们引入一些记号来做矩阵的计算。
 [^footnote2]: 正如我们之前所描述的那样，通常随机梯度下降用固定的学习率$\alpha$，但缓慢下降学习率$\alpha$到0，可以让参数收敛到全局最小而不是仅仅在最小值附近震荡。
+######2.1矩阵导数
+对于函数$f:\mathbb R ^{m\times n}\mapsto\mathbb R$从$m\times n$的矩阵映射到实数，我们将$f$对$A$的导数定义为：
+$$
+\triangledown_{A}f(A)=
+\left[
+\begin{matrix}
+\frac{\partial f}{\partial A_{11}} & \cdots & \frac{\partial f}{\partial A_{1n}}\\
+\vdots & \ddots & \vdots\\
+\frac{\partial f}{\partial A_{m1}} & \cdots & \frac{\partial f}{\partial A_{mn}}\\
+\end{matrix}
+\right]
+$$
+因此，梯度$\triangledown_Af(A)$自己是$m\times n$的矩阵，其中第$(i,j)$个元素是$\frac{\partial f}{\partial A_{ij}}$。例如假设
+$$
+A=\begin{bmatrix} 
+A_{11}&A_{12} \\
+A_{21}&A_{22}
+\end{bmatrix}
+$$
+是一个$2\times 2$的矩阵，函数$f:\mathbb R^{2\times2}\mapsto R$由下式给出：
+$$
+f(A)=\frac{3}{2}A_{11}+5A_{12}^2+A_{21}A_{22}
+$$
+其中$A_{ij}$表示矩阵A的第$(i,j)$个元素，则有：
+$$
+\triangledown_A f(A)=
+\begin{bmatrix}
+\frac32 &10A_{12}\\
+A_{22} & A_{21}
+\end{bmatrix}
+$$
+我们也引入**迹**算子，写作"tr."对于$2\times2$的方阵A，他的迹定义为对角线上所有元素的和：
+$$
+trA=\sum_{i=1}^nA_{ii}
+$$
+若a是实数（例如1$\times$1矩阵），那么$tr a=a$。（如果你还没有见过“算子记号”，可以把A的迹想象成tr(A)，把迹作为矩阵A的函数。通常不写括号。）
+迹算子有以下性质：若两个矩阵A，B都是方阵的，他们的乘积AB也是方阵，则有$trAB=trBA$（自己验证）。作为该性质的推广我们不难得出：
+$$
+trABC=trCAB=trBCA,\\
+trABCD=trDABC=trCDAB=trBCDA
+$$
+以下迹的性质也很容易验证。式中A和B都是方阵，a是实数：
+$$
+\begin{align}
+trA&=trA^T\\
+tr(A+B)&=trA+trB\\
+traA&=atrA
+\end{align}
+$$
+我们现不加证明地给出以下关于矩阵导数的结论（其中有一些我们在本章之后的地方才会用到）。公式（4）仅仅对非奇异的矩阵A适用，其中|A|是A的行列式。我们有：
+$$
+\begin{align}
+\triangledown_AtrAB&=B^T\tag 1\\
+\triangledown_{A^T}f(A)&=(\triangledown_Af(A))^T\tag 2\\
+\triangledown_AtrABA^TC&=CAB+C^TAB^T\tag 3\\
+\triangledown_A|A|&=|A|(A^{-1})^T\tag 4
+\end{align}
+$$
+为了让矩阵记号更加具体，让我们具体解释一下第一个方程。假设我们有一常数矩阵$B\in\mathbb R^{n\times m}$。我们根据$f(A)=trAB$定义函数$f:\mathbb R^{m\times n}\mapsto R$。注意该定义是合理的，因$A\in\mathbb R^{m\times n}$,则AB是方阵，能对其应用迹算子；因此f事实上从$\mathbb R^{m\times n}$映射到$\mathbb R$。我们能用矩阵导数的定义得到$\triangledown_Af(A)$，这是$m\times n$矩阵。上式(1)表明该矩阵第$(i,j)$项由$B^T$的$(i,j)$项给出，即$B_{ji}$。
+上式(1-3)的证明简单，留给读者作练习用。上式(4)可用矩阵的逆的伴随矩阵推导出[^footnote3].
+[^footnote3]:如果我们把A'定义成这样一个矩阵，其中第（i，j）个元素是$(-1)^{i+j}$乘以A删去i行j列后的方阵的行列式，那么可以证明$A^{-1}=A'^T/|A|$(你可以用标准的方法算e二阶$A^{-1}$来验证一致性。如果要得出更一般的结论，请参考中高级的线性代数书比如*Charles Curtis,1991, Linear Algebra, Springer*)。$A'=|A|(A^{-1})^T$得证。而且矩阵的行列式可以写成$|A|=\sum_jA_{ij}A'_{ij}$。由于$(A')_{ij}$与$(A)_{ij}$无关(由定义)，这就说明$\frac{\partial}{\partial A_{ij}}|A|=A_{ij}'$。把所有的放到一起就是结果。
+
+######2.2  再议最小二乘
+有了矩阵导数的帮助，让我们寻找使得$J(\theta)$最小化的$\theta$值的封闭形式。我们从用矩阵-向量记号重写$J$开始。
+给定训练集，定义**设计矩阵**X为$m\times n$矩阵(实际上是$m\times n+1$，如果包含截距项)的行包含了训练集的输入值：
+$$
+X=
+\begin{bmatrix}
+-(x^{(1)})^T-\\
+-(x^{(2)})^T-\\
+\vdots\\
+-(x^{(m)})^T-
+\end{bmatrix}
+$$
+让$\overrightarrow{y}$为包含训练集所有目标值的m维向量：
+$$
+\overrightarrow{y}=
+\begin{bmatrix}
+y^{(1)}\\y^{(2)}\\
+\vdots\\y^{(m)}\\
+\end{bmatrix}
+$$
+由于$h_\theta(x^{(i)})=(x^{(i)})^T\theta$我们能很简单地证明：
+
+$$
+\begin{align}
+X\theta-\overrightarrow{y} &=
+\begin{bmatrix}
+(x^{(1)})^T\theta\\
+\vdots\\
+(x^{(m)})^T\theta\\
+\end{bmatrix}-\begin{bmatrix}
+y^{(1)}\\
+\vdots\\y^{(m)}\\
+\end{bmatrix}
+ &=\begin{bmatrix}
+h_\theta(x^{(1)})-y^{(1)}\\
+\vdots\\
+h_\theta(x^{(m)})-y^{(m)}\\
+\end{bmatrix}
+\end{align}
+$$
+
+因此用向量z的一个性质我们有$z^Tz=\sum_iz^2_i$:
+
+$$
+\begin{align}
+\frac12(X\theta-\overrightarrow y)^T(X\theta-\overrightarrow y)&=\frac12\sum^m_{i=1}(h_\theta(x^{(i)})-y^{(i)})^2\\
+&=J(\theta)
+\end{align}
+$$
+最后，最小化J，让我们求关于$\theta$的导数。联立方程(2)(3)得到：
+$$
+\triangledown_{A^T}trABA^TC=B^TA^TB^T+BA^TC\tag 5
+$$
+有：
+$$
+\begin{align}
+\triangledown_{\theta}J(\theta)&=\triangledown_\theta\frac12(X\theta-\overrightarrow y)^T(X\theta-\overrightarrow y)\\
+&=\frac12\triangledown_\theta(\theta^TX^TX\theta-\theta^TX^T\overrightarrow y-\overrightarrow y^TX\theta+\overrightarrow y^T\overrightarrow y)\\
+&=\frac12\triangledown_\theta tr(\theta^TX^TX\theta-\theta^TX^T\overrightarrow y-\overrightarrow y^TX\theta+\overrightarrow y^T\overrightarrow y)\\
+&=\frac12\triangledown_\theta(tr\theta^TX^TX\theta-2tr\overrightarrow y^TX\theta)\\
+&=\frac12(X^TX\theta+X^TX\theta-2X^T\overrightarrow y)\\
+&=X^TX\theta-X^T\overrightarrow y
+\end{align}
+$$
+在第三步，利用了迹只是一个实数的这条性质；第四步利用了性质$trA=trA^T$;第五步利用了式(5),其中$A^T=\theta,B=B^T=X^TX及C=I$以及式(1)。为了求J最小值，令导数为零，得到正规方程：
+$$
+X^TX\theta=X^T\overrightarrow
+$$
+那么$J(\theta)$取最小值时$\theta$的取值由下式这样的封闭形式得到：
+$$
+\theta=(X^TX)^{-1}X^T\overrightarrow y
+$$
