@@ -409,5 +409,59 @@ l(\theta)&=logL(\theta)\\
 \end{align}
 $$
 那怎么求似然函数最大值呢？类似线性回归的例子，我们可以用梯度上升。用向量记号写，我们的更新因此可以这样写$\theta:=\theta+\alpha\triangledown_{\theta}l(\theta)$(注意公式里是正号不是负号，因为这个函数现在是求最大值，不是最小值)。让我们从单个训练样本（x，y）开始用随机梯度上升规则：
+$$
+\begin{align}
+\frac{\partial}{\partial\theta_j}l(\theta)&=(y\frac{1}{g(\theta^Tx)}-(1-y)\frac{1}{1-g(\theta^Tx)})\frac{\partial}{\partial\theta_j}g(\theta^Tx)\\
+&=(y\frac{1}{g(\theta^Tx)}-(1-y)\frac{1}{1-g(\theta^Tx)})g(\theta^Tx)(1-g(\theta^Tx))\frac{\partial}{\partial\theta_j}\theta^Tx\\
+&=(y(1-g(\theta^Tx))-(1-y)g(\theta^Tx))x_j\\
+&=(y-h_{\theta}(x))x_j
+\end{align}
+$$
+以上我们利用了$g^{'}(z)=g(z)(1-g(z))$因此，给出了梯度上升的公式：
+$$
+\theta_j:=\theta_j+\alpha(y{(i)}-h_{\theta}(x^{(i)}))x_j
+$$
+若我们将之与最小二乘LMS的更新公式相比较，会发现它们看上去一样的。但是这*不*是同一种算法，因为现在$h_{\theta}(x^{(i)})$定义为$\theta^Tx^{(i)}$的非线性函数。不管怎么说，不同的算法，不同的学习问题最终结果一样还是有点惊讶的，或许背后有着更深层次的原因？当我们学习GLM的时候会得到答案。(详见题集1的Q3附加题)。
 
+#### 6 题外话：感知机学习算法
+我们说点题外话，现在简单讨论一个在历史上很有趣的算法，之后我们在讨论学习理论的时候又会回来讨论他。考虑修改logistics函数“强迫”其只能输出0或者1。
+为了实现这样，把g的定义改成阈值函数看上去很自然：
+$$
+g(z)=
+\begin{cases}
+&1&if\ z\ \ge0\\
+&0&if\ z\ <0\\
+\end{cases}
+$$
+若和之前一样使$h_{\theta}(x)=g(\theta^Tx)$该是用修改后的g的定义，如果我们用如下更新规则：
+$$
+\theta_j:=\theta_j+\alpha(y^{(i)}-h_{\theta}(x^{(i)}))x_j^{(i)}
+$$
+那么我们就有了**感知机学习算法**。
+在20世纪60年代，提出了“感知机”作为大脑中单个神经元的工作原理模型。由于这个算法如此简单，这给算法给我们在今后的课程上讨论学习算法提供了一个很好的起点。注意感知机在形式上并不类似于我们讨论的其他算法。实际上这是一种与logistics回归或者线性回归非常不同类型的算法。特别是很难以给他一个有含义的概率解释或者像极大似然算法那样的推导。
+
+#### 7 另一种求$l(\theta)$最大值的算法
+回到用sigmoid函数作为g(z)的logstics回归，让我们讨论另外一种求$l(\theta)$最大值的算法。
+让我们考虑用牛顿法求一个函数的零点。具体来说我们有某函数$f:\mathbb R\mapsto\mathbb R$，我们希望找到一个$\theta$的值使得$f(\theta)=0$。其中$\theta\in\mathbb R$是实数。牛顿法为：
+$$
+\theta:=\theta-\frac{f(\theta)}{f^{'}(\theta)}
+$$
+这个算法有着非常自然的解释，就是我们用一个在当前$\theta$与函数f相切的线性函数来逼近函数f，解线性方程等于0的位置，并且用其来作下一个迭代值。
+下图是牛顿法的过程的图像：
 ![牛顿法](http://img.blog.csdn.net/20180415193442587?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2ltb25ydWFuOTI=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+左图可以看到函数f图像及y=0的水平直线。我们尝试求$\theta$使得$f(\theta)=0$，由图得，$\theta$的值约1.3。假设算法初始值$\theta=4.5$牛顿法拟合$\theta=4.5$f的切线求0点(中图)。这给了我们下一个$\theta$的猜测值，大约2.8。右图是再下一次迭代的结果，$\theta$大约为1.8。在几次迭代后，我们迅速地得到了$\theta=1.3$。
+就蹲发是一种求$f(\theta)=0$零点的方法。如果我们要求l最大值该怎么办？l的极大值点应该有一阶导数$l^{'}(\theta)=0$。所以令$f(\theta)=l^{'}(\theta)$我们可以用同样的方法来求l的最大值，我们得到了更新规则：
+$$
+\theta:=\theta-\frac{l^{'}(\theta)}{l^{''}(\theta)}
+$$
+(想一想，如果我们要用牛顿法求一个函数的最小值而不是最大值应该怎么做？)
+最后，在我们的logistic回归中，$\theta$是向量，所以我们要把牛顿法推广到这上来。牛顿法的推广需要多维度设定（也叫做牛顿-拉夫逊法）由下式给出：
+$$
+\theta:=\theta-H^{-1}\triangledown_{\theta}l(\theta)
+$$
+其中$\triangledown_{\theta}l(\theta)$一般是$l(\theta)$关于$\theta_{i}$的向量偏导数；H是n×n矩阵（实际上(n+1)×(N+1)，假设假设我们忽略截距项），叫做海森矩阵：
+$$
+H_{ij}=\frac{\partial^2l(\theta)}{\partial\theta_i\partial\theta_j}
+$$
+典型上说，牛顿法收敛比（批）梯度下降快，需要更少的迭代就能求得最小值。虽说一次牛顿法的迭代比梯度梯度下降更加“昂贵”，因为需要求n×n海森矩阵，但是只要n不太大一般总是比较快的。当牛顿法应用于logistic对数极大似然函数$l(\theta)$时，结果的方法叫做**Fisher scoring**。
+
