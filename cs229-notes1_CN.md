@@ -612,7 +612,7 @@ p(y=i|x;\theta)&=\phi_i\\
 \end{align}
 $$
 该模型应用于分类问题，其中$y\in\{1,...,k\}$，这成为softmax回归。这是推广了的logistic回归。
-我们的假设ui输出：
+我们的假设输出：
 $$
 \begin{array}\\
 h_{\theta}(x)&=E[T(y)|x;\theta]\\
