@@ -1,6 +1,7 @@
 写在开篇的话：  
 这一系列的笔记是斯坦福大学cs229 machine learning 机器学习的课程笔记。初步的规划是将[课程网站](http://cs229.stanford.edu/syllabus.html)上的资料翻译成中文，同时也作为学习的一个记录。同时由于水平有限，可能有一些不能很好翻译的地方会用自己的话表达。同时课程的视频资源详见[bilibili](https://www.bilibili.com/video/av9912938/)。一共有20节课，一般平均每节课大约4-8小节不等。
 本篇原文见[cs229-notes1.pdf](http://cs229.stanford.edu/notes/cs229-notes1.pdf)。
+
 [TOC]
 
 #CS229 课程笔记
